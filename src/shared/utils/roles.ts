@@ -21,3 +21,9 @@ export const CARGO_BADGE_VARIANT: Record<Cargo, NonNullable<BadgeProps["variant"
   SUPERVISOR: "yellow",
   ENCARREGADO: "gray",
 }
+
+export function canAccess(role: Cargo | undefined, allowed?: Cargo[]) {
+  if (!allowed || allowed.length === 0) return true
+  if (!role) return false
+  return allowed.includes(role)
+}

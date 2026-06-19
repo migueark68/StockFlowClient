@@ -5,3 +5,11 @@ export interface ApiError {
   message: string
   path: string
 }
+
+export interface Paginated<T> {
+  data: T[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}

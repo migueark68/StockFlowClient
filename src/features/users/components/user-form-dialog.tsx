@@ -23,18 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select"
+import { Switch } from "@/shared/ui/switch"
+import { CARGO_OPTIONS } from "@/shared/utils/roles"
 
 interface UserFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   user?: User | null
 }
-
-const ROLE_OPTIONS = [
-  { value: "ADMINISTRADOR", label: "Administrador" },
-  { value: "GERENTE", label: "Gerente" },
-  { value: "OPERADOR", label: "Operador" },
-]
 
 export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps) {
   const isEdit = Boolean(user)
@@ -52,54 +48,53 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
   } = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: "",
+      nome: "",
       email: "",
-      role: "OPERADOR",
-      status: "ATIVO",
-      password: "",
+      login: "",
+      cargo: "ENCARREGADO",
+      ativo: true,
+      senha: "",
     },
   })
 
   useEffect(() => {
     if (open) {
       reset({
-        name: user?.name ?? "",
+        nome: user?.nome ?? "",
         email: user?.email ?? "",
-        role: user?.role ?? "OPERADOR",
-        status: user?.status ?? "ATIVO",
-        password: "",
+        login: user?.login ?? "",
+        cargo: user?.cargo ?? "ENCARREGADO",
+        ativo: user?.ativo ?? true,
+        senha: "",
       })
     }
   }, [open, user, reset])
 
-  const role = watch("role")
-  const status = watch("status")
+  const cargo = watch("cargo")
+  const ativo = watch("ativo")
 
   const onSubmit = (values: UserFormValues) => {
     if (isEdit && user) {
       const payload = {
-        name: values.name,
+        nome: values.nome,
         email: values.email,
-        role: values.role,
-        status: values.status,
-        ...(values.password ? { password: values.password } : {}),
+        login: values.login,
+        cargo: values.cargo,
+        ativo: values.ativo,
       }
       updateMutation.mutate(
-        { id: user.id, input: payload },
+        { id: String(user.id), input: payload },
         { onSuccess: () => onOpenChange(false) },
       )
     } else {
-      if (!values.password) {
-        // create requires a password
-        return
-      }
+      if (!values.senha) return
       createMutation.mutate(
         {
-          name: values.name,
+          nome: values.nome,
           email: values.email,
-          role: values.role,
-          status: values.status,
-          password: values.password,
+          login: values.login,
+          cargo: values.cargo,
+          senha: values.senha,
         },
         { onSuccess: () => onOpenChange(false) },
       )
@@ -113,16 +108,16 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
           <DialogTitle>{isEdit ? "Editar usuário" : "Novo usuário"}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Atualize os dados do usuário. Deixe a senha em branco para mantê-la."
+              ? "Atualize os dados do usuário."
               : "Preencha os dados para cadastrar um novo usuário."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
           <div className="grid gap-2">
-            <Label htmlFor="name">Nome completo</Label>
-            <Input id="name" placeholder="Ex: João Silva" {...register("name")} aria-invalid={!!errors.name} />
-            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            <Label htmlFor="nome">Nome completo</Label>
+            <Input id="nome" placeholder="Ex: João Silva" {...register("nome")} aria-invalid={!!errors.nome} />
+            {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
           </div>
 
           <div className="grid gap-2">
@@ -137,52 +132,54 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
             {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
           </div>
 
+          <div className="grid gap-2">
+            <Label htmlFor="login">Login</Label>
+            <Input id="login" placeholder="seu.login" {...register("login")} aria-invalid={!!errors.login} />
+            {errors.login && <p className="text-xs text-destructive">{errors.login.message}</p>}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="role">Perfil</Label>
-              <Select value={role} onValueChange={(v) => setValue("role", v as UserFormValues["role"])}>
-                <SelectTrigger id="role">
+              <Label htmlFor="cargo">Cargo</Label>
+              <Select value={cargo} onValueChange={(v) => setValue("cargo", v as UserFormValues["cargo"])}>
+                <SelectTrigger id="cargo">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLE_OPTIONS.map((opt) => (
+                  {CARGO_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
+              {errors.cargo && <p className="text-xs text-destructive">{errors.cargo.message}</p>}
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={(v) => setValue("status", v as UserFormValues["status"])}>
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ATIVO">Ativo</SelectItem>
-                  <SelectItem value="INATIVO">Inativo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="password">{isEdit ? "Nova senha (opcional)" : "Senha"}</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register("password")}
-              aria-invalid={!!errors.password}
-            />
-            {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-            {!isEdit && !errors.password && (
-              <p className="text-xs text-muted-foreground">Mínimo de 6 caracteres.</p>
+            {isEdit && (
+              <div className="flex items-center gap-3 pt-6">
+                <Switch id="ativo" checked={ativo} onCheckedChange={(v) => setValue("ativo", v)} />
+                <Label htmlFor="ativo" className="cursor-pointer">
+                  {ativo ? "Ativo" : "Inativo"}
+                </Label>
+              </div>
             )}
           </div>
+
+          {!isEdit && (
+            <div className="grid gap-2">
+              <Label htmlFor="senha">Senha</Label>
+              <Input
+                id="senha"
+                type="password"
+                placeholder="••••••••"
+                {...register("senha")}
+                aria-invalid={!!errors.senha}
+              />
+              {errors.senha && <p className="text-xs text-destructive">{errors.senha.message}</p>}
+              {!errors.senha && <p className="text-xs text-muted-foreground">Mínimo de 6 caracteres.</p>}
+            </div>
+          )}
 
           <DialogFooter className="mt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>

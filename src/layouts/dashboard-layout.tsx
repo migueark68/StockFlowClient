@@ -30,7 +30,7 @@ export function DashboardLayout() {
     setMobileOpen(false)
   }, [location.pathname])
 
-  const activeItem = NAV_ITEMS.filter((item) => canAccess(user?.role, item.roles)).find((item) =>
+  const activeItem = NAV_ITEMS.filter((item) => canAccess(user?.cargo, item.roles)).find((item) =>
     item.end ? location.pathname === item.to : location.pathname.startsWith(item.to),
   )
 

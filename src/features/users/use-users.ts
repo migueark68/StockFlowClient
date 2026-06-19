@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { usersService, type ListUsersParams } from "./users.service"
-import type { CreateUserInput, UpdateUserInput, User } from "@/types/user"
+import type { CreateUserPayload, UpdateUserPayload, User } from "@/types/user"
 import type { Paginated } from "@/types/api"
 import { getApiErrorMessage } from "@/shared/utils/api-error"
 
@@ -27,7 +27,7 @@ export function useUsers(params: ListUsersParams) {
 export function useCreateUser() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: CreateUserInput) => usersService.create(input),
+    mutationFn: (input: CreateUserPayload) => usersService.create(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: usersKeys.all })
       toast.success("Usuário criado com sucesso")
@@ -39,7 +39,7 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: UpdateUserInput }) => usersService.update(id, input),
+    mutationFn: ({ id, input }: { id: string; input: UpdateUserPayload }) => usersService.update(id, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: usersKeys.all })
       toast.success("Usuário atualizado com sucesso")

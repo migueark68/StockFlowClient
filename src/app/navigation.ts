@@ -21,6 +21,7 @@ export interface NavItem {
   roles?: Cargo[]
   /** Placeholder routes are not yet implemented. */
   placeholder?: boolean
+  end?: boolean
 }
 
 export const NAV_ITEMS: NavItem[] = [

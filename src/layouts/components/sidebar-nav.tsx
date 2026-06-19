@@ -12,7 +12,7 @@ interface SidebarNavProps {
 
 export function SidebarNav({ collapsed, onNavigate }: SidebarNavProps) {
   const { user } = useAuth()
-  const role = user?.role
+  const role = user?.cargo
 
   const items = NAV_ITEMS.filter((item) => canAccess(role, item.roles))
 
