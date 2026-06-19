@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
+import { Loader as Loader2 } from "lucide-react"
 import { userFormSchema, type UserFormValues } from "../user.schema"
 import { useCreateUser, useUpdateUser } from "../use-users"
 import type { User } from "@/types/user"
