@@ -7,7 +7,7 @@ import { tokenStorage } from "./token-storage"
  * VITE_API_URL environment variable (e.g. https://api.suaempresa.com).
  * Defaults to a relative "/api" path when proxied on the same origin.
  */
-const baseURL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? ""
+const baseURL = "http://localhost:8080/api"
 
 export const api = axios.create({
   baseURL,

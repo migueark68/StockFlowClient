@@ -11,26 +11,26 @@ export interface ListUsersParams {
 
 export const usersService = {
   list: async (params: ListUsersParams = {}) => {
-    const { data } = await api.get<Paginated<User> | User[]>("/api/usuarios", { params })
+    const { data } = await api.get<Paginated<User> | User[]>("/usuarios", { params })
     return data
   },
 
   getById: async (id: string) => {
-    const { data } = await api.get<User>(`/api/usuarios/${id}`)
+    const { data } = await api.get<User>(`/usuarios/${id}`)
     return data
   },
 
   create: async (input: CreateUserPayload) => {
-    const { data } = await api.post<User>("/api/usuarios", input)
+    const { data } = await api.post<User>("/usuarios", input)
     return data
   },
 
   update: async (id: string, input: UpdateUserPayload) => {
-    const { data } = await api.patch<User>(`/api/usuarios/${id}`, input)
+    const { data } = await api.patch<User>(`/usuarios/${id}`, input)
     return data
   },
 
   remove: async (id: string) => {
-    await api.delete(`/api/usuarios/${id}`)
+    await api.delete(`/usuarios/${id}`)
   },
 }
