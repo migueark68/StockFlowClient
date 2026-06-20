@@ -5,6 +5,7 @@ import { Loader as Loader2 } from "lucide-react"
 import { userFormSchema, type UserFormValues } from "../user.schema"
 import { useCreateUser, useUpdateUser } from "../use-users"
 import type { User } from "@/types/user"
+import { useAuth } from "@/context/auth-context"
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
   const createMutation = useCreateUser()
   const updateMutation = useUpdateUser()
   const isPending = createMutation.isPending || updateMutation.isPending
+  const { user: authUser, logout } = useAuth()
 
   const {
     register,
@@ -82,9 +84,17 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
         cargo: values.cargo,
         ativo: values.ativo,
       }
+      const isSelfEdit = authUser?.id === user.id
       updateMutation.mutate(
         { id: String(user.id), input: payload },
-        { onSuccess: () => onOpenChange(false) },
+        {
+          onSuccess: () => {
+            onOpenChange(false)
+            if (isSelfEdit) {
+              logout()
+            }
+          },
+        },
       )
     } else {
       if (!values.senha) return

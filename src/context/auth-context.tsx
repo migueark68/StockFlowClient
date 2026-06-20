@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { authService } from "@/features/auth/auth.service"
 import { api, setUnauthorizedHandler } from "@/services/api"
@@ -18,6 +19,7 @@ interface AuthContextValue {
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient()
   const [user, setUser] = React.useState<AuthUser | null>(null)
   const [token, setToken] = React.useState<string | null>(null)
   const [isInitializing, setIsInitializing] = React.useState(true)
@@ -26,7 +28,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     tokenStorage.clear()
     setUser(null)
     setToken(null)
-  }, [])
+    delete api.defaults.headers.common.Authorization
+    try {
+      sessionStorage.clear()
+    } catch {
+      // ignore
+    }
+    queryClient.clear()
+  }, [queryClient])
 
   // Recover the session from localStorage on first mount.
   React.useEffect(() => {
@@ -53,7 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api.defaults.headers.common.Authorization = `Bearer ${response.accessToken}`
     setToken(response.accessToken)
     setUser(response.usuario)
-  }, [])
+    queryClient.clear()
+  }, [queryClient])
 
   const hasRole = React.useCallback(
     (roles: Cargo | Cargo[]) => {
