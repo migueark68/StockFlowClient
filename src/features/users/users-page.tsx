@@ -86,16 +86,16 @@ export function UsersPage() {
         ),
       },
       {
-        accessorKey: "criadoEm",
+        accessorKey: "dataCriacao",
         header: "Criado em",
         size: 150,
-        cell: ({ row }) => formatDate(row.original.criadoEm),
+        cell: ({ row }) => formatDate(row.original.dataCriacao),
       },
       {
-        accessorKey: "atualizadoEm",
+        accessorKey: "dataAtualizacao",
         header: "Atualizado em",
         size: 150,
-        cell: ({ row }) => formatDate(row.original.atualizadoEm),
+        cell: ({ row }) => formatDate(row.original.dataAtualizacao),
       },
       ...(canManageUsers
         ? [

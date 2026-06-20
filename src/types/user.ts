@@ -7,8 +7,8 @@ export interface User {
   login: string
   cargo: Cargo
   ativo: boolean
-  criadoEm: string
-  atualizadoEm: string
+  dataCriacao: string
+  dataAtualizacao: string
 }
 
 export interface CreateUserPayload {
