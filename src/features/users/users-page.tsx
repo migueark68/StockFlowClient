@@ -25,8 +25,12 @@ import { ErrorState } from "@/shared/components/error-state"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
 import { CARGO_LABEL, CARGO_BADGE_VARIANT } from "@/shared/utils/roles"
 import { formatDate } from "@/lib/utils"
+import { useAuth } from "@/context/auth-context"
 
 export function UsersPage() {
+  const { user: authUser } = useAuth()
+  const canManageUsers = authUser?.cargo === "ADMINISTRADOR"
+
   const [search, setSearch] = useState("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
@@ -93,40 +97,44 @@ export function UsersPage() {
         size: 150,
         cell: ({ row }) => formatDate(row.original.atualizadoEm),
       },
-      {
-        id: "acoes",
-        header: "",
-        size: 100,
-        cell: ({ row }) => (
-          <div className="flex items-center justify-end gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => {
-                setEditingUser(row.original)
-                setFormOpen(true)
-              }}
-              aria-label="Editar"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => {
-                setDeletingUser(row.original)
-                setDeleteOpen(true)
-              }}
-              aria-label="Excluir"
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ),
-      },
+      ...(canManageUsers
+        ? [
+            {
+              id: "acoes",
+              header: "",
+              size: 100,
+              cell: ({ row }: { row: { original: User } }) => (
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => {
+                      setEditingUser(row.original)
+                      setFormOpen(true)
+                    }}
+                    aria-label="Editar"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => {
+                      setDeletingUser(row.original)
+                      setDeleteOpen(true)
+                    }}
+                    aria-label="Excluir"
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ),
+            } as ColumnDef<User>,
+          ]
+        : []),
     ],
-    [],
+    [canManageUsers],
   )
 
   const table = useReactTable({
@@ -168,15 +176,17 @@ export function UsersPage() {
             className="pl-9"
           />
         </div>
-        <Button
-          onClick={() => {
-            setEditingUser(null)
-            setFormOpen(true)
-          }}
-        >
-          <Plus className="h-4 w-4" />
-          Novo Usuário
-        </Button>
+        {canManageUsers && (
+          <Button
+            onClick={() => {
+              setEditingUser(null)
+              setFormOpen(true)
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Novo Usuário
+          </Button>
+        )}
       </div>
 
       {isError ? (
@@ -233,15 +243,17 @@ export function UsersPage() {
                         title="Nenhum usuário encontrado"
                         description="Tente ajustar os filtros ou adicione um novo usuário."
                         action={
-                          <Button
-                            onClick={() => {
-                              setEditingUser(null)
-                              setFormOpen(true)
-                            }}
-                          >
-                            <Plus className="h-4 w-4" />
-                            Novo Usuário
-                          </Button>
+                          canManageUsers ? (
+                            <Button
+                              onClick={() => {
+                                setEditingUser(null)
+                                setFormOpen(true)
+                              }}
+                            >
+                              <Plus className="h-4 w-4" />
+                              Novo Usuário
+                            </Button>
+                          ) : undefined
                         }
                       />
                     </TableCell>
@@ -319,23 +331,27 @@ export function UsersPage() {
         </div>
       )}
 
-      <UserFormDialog
-        open={formOpen}
-        onOpenChange={(open) => {
-          setFormOpen(open)
-          if (!open) setEditingUser(null)
-        }}
-        user={editingUser}
-      />
+      {canManageUsers && (
+        <>
+          <UserFormDialog
+            open={formOpen}
+            onOpenChange={(open) => {
+              setFormOpen(open)
+              if (!open) setEditingUser(null)
+            }}
+            user={editingUser}
+          />
 
-      <UserDeleteDialog
-        open={deleteOpen}
-        onOpenChange={(open) => {
-          setDeleteOpen(open)
-          if (!open) setDeletingUser(null)
-        }}
-        user={deletingUser}
-      />
+          <UserDeleteDialog
+            open={deleteOpen}
+            onOpenChange={(open) => {
+              setDeleteOpen(open)
+              if (!open) setDeletingUser(null)
+            }}
+            user={deletingUser}
+          />
+        </>
+      )}
     </motion.div>
   )
 }
