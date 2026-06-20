@@ -9,7 +9,7 @@ const categoriesKeys = {
   list: (params: ListCategoriesParams) => [...categoriesKeys.all, "list", params] as const,
 }
 
-export function useCategories(params: ListCategoriesParams) {
+export function useCategories(params: ListCategoriesParams = {}) {
   return useQuery({
     queryKey: categoriesKeys.list(params),
     queryFn: () => categoriesService.list(params),

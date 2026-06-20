@@ -18,6 +18,14 @@ export function useMovementsSummary(tipo: TipoMovimentacao) {
   })
 }
 
+export function useAllMovementsSummary() {
+  return useQuery({
+    queryKey: [...movementsKeys.all, "summary", "all"] as const,
+    queryFn: () => movementsService.listAllSummary(),
+    placeholderData: (prev) => prev,
+  })
+}
+
 export function useMovementDetail(id: number | null) {
   return useQuery({
     queryKey: movementsKeys.detail(id ?? 0),

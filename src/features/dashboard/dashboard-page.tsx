@@ -1,15 +1,46 @@
 import { motion } from "motion/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
-import { Package, ArrowDownToLine, ArrowUpFromLine, Boxes } from "lucide-react"
-
-const stats = [
-  { label: "Produtos cadastrados", value: "1.248", change: "+12%", icon: Package },
-  { label: "Entradas (mês)", value: "320", change: "+8%", icon: ArrowDownToLine },
-  { label: "Saídas (mês)", value: "278", change: "+15%", icon: ArrowUpFromLine },
-  { label: "Itens em estoque", value: "970", change: "+5%", icon: Boxes },
-]
+import { useAuth } from "@/context/auth-context"
+import { useProducts } from "@/features/products/use-products"
+import { useCategories } from "@/features/categories/use-categories"
+import { useStock } from "@/features/stock/use-stock"
+import { useAllMovementsSummary } from "@/features/movements/use-movements"
+import { DashboardHeader } from "./components/dashboard-header"
+import { KpiCard } from "./components/kpi-card"
+import { MovementDonutChart } from "./components/movement-donut-chart"
+import { MovementBarChart } from "./components/movement-bar-chart"
+import { StockLowList, StockHighList } from "./components/stock-alerts"
+import { RecentMovements } from "./components/recent-movements"
+import { QuickActions } from "./components/quick-actions"
+import { Package, Tags, Box, Lock, AlertTriangle, BarChart3 } from "lucide-react"
+import type { StockItem } from "@/types/stock"
 
 export function DashboardPage() {
+  const { user } = useAuth()
+  const isEncarregado = user?.cargo === "ENCARREGADO"
+
+  const { data: products = [], isLoading: loadingProducts } = useProducts()
+  const { data: categories = [], isLoading: loadingCategories } = useCategories()
+  const { data: stockItems = [], isLoading: loadingStock } = useStock()
+  const { data: movements = [], isLoading: loadingMovements } = useAllMovementsSummary()
+
+  const totalProducts = products.length
+  const totalCategories = categories.length
+  const totalAvailable = stockItems.reduce((sum: number, i: StockItem) => sum + i.quantidadeDisponivel, 0)
+  const totalReserved = stockItems.reduce((sum: number, i: StockItem) => sum + i.quantidadeReservada, 0)
+  const lowStockCount = stockItems.filter(
+    (i: StockItem) => i.quantidadeDisponivel <= i.produto.estoqueMinimo
+  ).length
+
+  const avgOccupancy = (() => {
+    const valid = stockItems.filter((i: StockItem) => i.produto.estoqueMaximo > 0)
+    if (valid.length === 0) return 0
+    const totalPct = valid.reduce(
+      (sum: number, i: StockItem) => sum + i.quantidadeDisponivel / i.produto.estoqueMaximo,
+      0
+    )
+    return Math.round((totalPct / valid.length) * 100)
+  })()
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -17,36 +48,79 @@ export function DashboardPage() {
       transition={{ duration: 0.35, ease: "easeOut" }}
       className="flex flex-col gap-6"
     >
-      <div>
-        <h2 className="font-heading text-xl font-semibold tracking-tight">Dashboard</h2>
-        <p className="text-sm text-muted-foreground">Visão geral do sistema em tempo real.</p>
+      <DashboardHeader />
+
+      {/* KPI Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <KpiCard
+          label="Produtos"
+          value={totalProducts}
+          icon={Package}
+          isLoading={loadingProducts}
+          index={0}
+        />
+        <KpiCard
+          label="Categorias"
+          value={totalCategories}
+          icon={Tags}
+          isLoading={loadingCategories}
+          index={1}
+        />
+        <KpiCard
+          label="Itens Disponíveis"
+          value={totalAvailable}
+          icon={Box}
+          isLoading={loadingStock}
+          index={2}
+        />
+        <KpiCard
+          label="Itens Reservados"
+          value={totalReserved}
+          icon={Lock}
+          isLoading={loadingStock}
+          index={3}
+        />
+        <KpiCard
+          label="Estoque Baixo"
+          value={lowStockCount}
+          icon={AlertTriangle}
+          valueColor={lowStockCount > 0 ? "text-destructive" : undefined}
+          iconColor={lowStockCount > 0 ? "text-destructive" : undefined}
+          iconBg={lowStockCount > 0 ? "bg-destructive/10" : undefined}
+          isLoading={loadingStock}
+          index={4}
+        />
+        <KpiCard
+          label="Ocupação Média"
+          value={`${avgOccupancy}%`}
+          icon={BarChart3}
+          progress={avgOccupancy}
+          isLoading={loadingStock}
+          index={5}
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-success">{stat.change}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Movimentações (mês)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-border bg-muted/40 text-sm text-muted-foreground">
-            Gráfico de movimentações — placeholder
+      {isEncarregado ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <MovementDonutChart data={movements} isLoading={loadingMovements} />
+          <MovementBarChart data={movements} isLoading={loadingMovements} />
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <MovementDonutChart data={movements} isLoading={loadingMovements} />
+            <MovementBarChart data={movements} isLoading={loadingMovements} />
+            <div className="flex flex-col gap-6">
+              <StockLowList items={stockItems} isLoading={loadingStock} />
+              <StockHighList items={stockItems} isLoading={loadingStock} />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <RecentMovements data={movements} isLoading={loadingMovements} />
+
+          <QuickActions />
+        </>
+      )}
     </motion.div>
   )
 }

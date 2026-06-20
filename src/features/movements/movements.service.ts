@@ -14,6 +14,11 @@ export const movementsService = {
     return data
   },
 
+  listAllSummary: async () => {
+    const { data } = await api.get<MovementSummary[]>("/movimentacoes/resumo")
+    return data
+  },
+
   getById: async (id: number) => {
     const { data } = await api.get<Movement>(`/movimentacoes/${id}`)
     return data

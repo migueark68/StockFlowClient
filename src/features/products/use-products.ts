@@ -9,7 +9,7 @@ const productsKeys = {
   list: (params: ListProductsParams) => [...productsKeys.all, "list", params] as const,
 }
 
-export function useProducts(params: ListProductsParams) {
+export function useProducts(params: ListProductsParams = {}) {
   return useQuery({
     queryKey: productsKeys.list(params),
     queryFn: () => productsService.list(params),
