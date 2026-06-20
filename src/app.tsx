@@ -7,6 +7,7 @@ import { DashboardPage } from "./features/dashboard/dashboard-page"
 import { UsersPage } from "./features/users/users-page"
 import { CategoriesPage } from "./features/categories/categories-page"
 import { ProductsPage } from "./features/products/products-page"
+import { StockPage } from "./features/stock/stock-page"
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
               <Route path="/usuarios" element={<UsersPage />} />
               <Route path="/categorias" element={<CategoriesPage />} />
               <Route path="/produtos" element={<ProductsPage />} />
+              <Route path="/estoque" element={<StockPage />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Route>
