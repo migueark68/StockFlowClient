@@ -5,6 +5,7 @@ import { ProtectedRoute } from "./routes/protected-route"
 import { LoginPage } from "./features/auth/login-page"
 import { DashboardPage } from "./features/dashboard/dashboard-page"
 import { UsersPage } from "./features/users/users-page"
+import { CategoriesPage } from "./features/categories/categories-page"
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/usuarios" element={<UsersPage />} />
+              <Route path="/categorias" element={<CategoriesPage />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Route>

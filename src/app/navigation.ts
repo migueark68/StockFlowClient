@@ -8,6 +8,7 @@ import {
   BarChart3,
   Users,
   Settings,
+  Tags,
   type LucideIcon,
 } from "lucide-react"
 
@@ -49,6 +50,11 @@ export const NAV_ITEMS: NavItem[] = [
     to: "/usuarios",
     icon: Users,
     roles: ["ADMINISTRADOR", "GERENTE"],
+  },
+  {
+    label: "Categorias",
+    to: "/categorias",
+    icon: Tags,
   },
   {
     label: "Configurações",
