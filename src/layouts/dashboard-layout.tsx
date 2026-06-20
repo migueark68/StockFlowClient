@@ -7,9 +7,8 @@ import { SidebarNav } from "./components/sidebar-nav"
 import { UserMenu } from "./components/user-menu"
 import { Button } from "@/shared/ui/button"
 import { useMediaQuery } from "@/shared/hooks/use-media-query"
-import { NAV_ITEMS } from "@/app/navigation"
+import { getFlatNavItems } from "@/app/navigation"
 import { useAuth } from "@/context/auth-context"
-import { canAccess } from "@/shared/utils/roles"
 import { cn } from "@/lib/utils"
 
 const COLLAPSE_KEY = "stockflow:sidebar-collapsed"
@@ -30,7 +29,7 @@ export function DashboardLayout() {
     setMobileOpen(false)
   }, [location.pathname])
 
-  const activeItem = NAV_ITEMS.filter((item) => canAccess(user?.cargo, item.roles)).find((item) =>
+  const activeItem = getFlatNavItems(user?.cargo).find((item) =>
     item.end ? location.pathname === item.to : location.pathname.startsWith(item.to),
   )
 

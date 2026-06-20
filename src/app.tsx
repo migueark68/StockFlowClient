@@ -8,6 +8,9 @@ import { UsersPage } from "./features/users/users-page"
 import { CategoriesPage } from "./features/categories/categories-page"
 import { ProductsPage } from "./features/products/products-page"
 import { StockPage } from "./features/stock/stock-page"
+import { EntradasPage } from "./features/entradas/entradas-page"
+import { SaidasPage } from "./features/saidas/saidas-page"
+import { AjustesPage } from "./features/ajustes/ajustes-page"
 
 export default function App() {
   return (
@@ -22,6 +25,9 @@ export default function App() {
               <Route path="/categorias" element={<CategoriesPage />} />
               <Route path="/produtos" element={<ProductsPage />} />
               <Route path="/estoque" element={<StockPage />} />
+              <Route path="/entradas" element={<EntradasPage />} />
+              <Route path="/saidas" element={<SaidasPage />} />
+              <Route path="/ajustes" element={<AjustesPage />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Route>
